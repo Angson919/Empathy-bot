@@ -7,10 +7,8 @@ import json
 import os
 import sys
 
-# Fix import path for models
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# AI models
 from transformers.pipelines import pipeline
 import spacy
 from models.intent import detect_intent
@@ -18,7 +16,6 @@ from models.intent import detect_intent
 emotion_model = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
 nlp = spacy.load("en_core_web_lg")
 
-# Redis config
 r = redis.Redis(
     host='redis-16244.c80.us-east-1-2.ec2.redns.redis-cloud.com',
     port=16244,
@@ -33,7 +30,6 @@ try:
 except Exception as e:
     print(f"❌ Redis error: {e}")
 
-# FastAPI app
 app = FastAPI()
 
 app.add_middleware(
@@ -47,7 +43,6 @@ app.add_middleware(
 def root():
     return {"message": "Hello from EmpathyBot!"}
 
-# Request & Response Models
 class Message(BaseModel):
     text: str
     user_id: str | None = None
@@ -59,7 +54,6 @@ class EnhancedResponse(BaseModel):
     crisis_alert: bool
     suggested_action: str | None = None
 
-# Utilities
 def crisis_check(text: str) -> bool:
     red_flags = ["kill myself", "want to die", "end it all", "suicide", "can’t go on"]
     return any(flag in text.lower() for flag in red_flags)
@@ -106,35 +100,27 @@ def generate_response(emotion: str, intent: str) -> str:
     emotion = emotion.lower()
     intent = intent.lower()
 
-    # Try exact match
     if intent in response_map.get(emotion, {}):
         return response_map[emotion][intent]
 
-    # Fallback to neutral
     if intent in response_map.get("neutral", {}):
         return response_map["neutral"][intent]
 
-    # Absolute fallback
-    return "I'm here for you — talk to me about whatever’s on your mind."
+return "I'm here for you — talk to me about whatever’s on your mind."
 
 @app.post("/chat")
 async def chat(message: Message) -> EnhancedResponse:
-    # Emotion detection
     emotion_raw = emotion_model(message.text)
     emotion = emotion_raw[0]['label'] if emotion_raw else "neutral"
 
-    # Intent detection
     intent = detect_intent(message.text)
 
     print(f"[DEBUG] Emotion: {emotion}, Intent: {intent}")
 
-    # Crisis check
     crisis_alert = crisis_check(message.text)
 
-    # Build response
     reply = generate_response(emotion, intent)
 
-    # Store memory
     if message.user_id:
         update_mood_history(message.user_id, emotion)
         r.rpush(f"user:{message.user_id}:convo", json.dumps({

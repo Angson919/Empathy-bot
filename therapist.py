@@ -4,7 +4,7 @@ import aioredis
 
 import asyncio
 
-r = None  # Will be initialized asynchronously
+r = None  
 
 async def generate_mood_chart(user_id: str):
     global r
@@ -12,7 +12,6 @@ async def generate_mood_chart(user_id: str):
         r = await aioredis.from_url(
     "redis://default:dZth7NbWs6puJxaqizIprq9yRQgRLtIM@redis-16244.c80.us-east-1-2.ec2.redns.redis-cloud.com:16244"
 )
-    # Fetch mood history from Redis
     if not await r.exists(f"user:{user_id}:moods"):
         return "No mood history available for this user."
     moods = await r.lrange(f"user:{user_id}:moods", 0, -1)

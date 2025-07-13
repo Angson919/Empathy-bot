@@ -1,6 +1,5 @@
 from typing import Dict, List
 
-# 1. Define your intents with details and synonyms
 INTENT_DETAILS: Dict[str, Dict] = {
     "venting": {
         "description": "User wants to express feelings or frustrations.",
@@ -85,7 +84,6 @@ INTENT_DETAILS: Dict[str, Dict] = {
     }
 }
 
-# 2. Build a normalization map for synonyms
 INTENT_NORMALIZATION: Dict[str, str] = {}
 for intent, details in INTENT_DETAILS.items():
     INTENT_NORMALIZATION[intent] = intent
@@ -101,28 +99,22 @@ def get_intent_details(intent_label: str) -> Dict:
     normalized = normalize_intent(intent_label)
     return INTENT_DETAILS.get(normalized, INTENT_DETAILS["smalltalk"])
 
-# 3. Simple rule-based intent detection (expandable)
 def detect_intent(text: str) -> str:
     """Detect user intent from text using keyword matching."""
     text_lower = text.lower()
     for intent, details in INTENT_DETAILS.items():
-        # Check for synonyms and example phrases
         for keyword in details["synonyms"] + details["examples"]:
             if keyword.lower() in text_lower:
                 return intent
-    # Fallback: check for common greeting/bye words
-    if any(word in text_lower for word in ["hello", "hi", "hey"]):
+if any(word in text_lower for word in ["hello", "hi", "hey"]):
         return "greeting"
     if any(word in text_lower for word in ["bye", "goodbye", "see you"]):
         return "goodbye"
-    # Default to smalltalk
     return "smalltalk"
 
-# 4. (Optional) List all supported intents
 def list_intents() -> List[str]:
     return list(INTENT_DETAILS.keys())
 
-# Example usage:
 if __name__ == "__main__":
     test_texts = [
         "Can I vent for a moment?",

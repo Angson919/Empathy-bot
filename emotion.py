@@ -16,7 +16,6 @@ EMOTION_DETAILS = {
     "neutral": {"description": "No strong emotion", "emoji": "😐", "synonyms": ["calm", "indifferent", "okay"]},
 }
 
-# Build a normalization map from all synonyms to their main emotion
 EMOTION_NORMALIZATION = {}
 for main, details in EMOTION_DETAILS.items():
     EMOTION_NORMALIZATION[main] = main
@@ -24,10 +23,8 @@ for main, details in EMOTION_DETAILS.items():
         EMOTION_NORMALIZATION[synonym.lower()] = main
 
 def get_emotion_details(emotion_label: str):
-    """Return details for a given emotion label."""
     normalized = normalize_emotion(emotion_label)
     return EMOTION_DETAILS.get(normalized, EMOTION_DETAILS["neutral"])
 
 def normalize_emotion(emotion_label: str) -> str:
-    """Normalize an emotion or synonym to a main emotion category."""
     return EMOTION_NORMALIZATION.get(emotion_label.lower(), "neutral")
